@@ -23,7 +23,12 @@
       },
       {
         "command": "codedocsgen.generateDocs",
-        "title": "Generate CodeDocsGen",
+        "title": "Generate JSDoc for selected element",
+        "category": "CodeDocsGen"
+      },
+      {
+        "command": "codedocsgen.generateDocsForFile",
+        "title": "Generate JSDoc for all elements",
         "category": "CodeDocsGen"
       }
     ],
@@ -31,6 +36,9 @@
       "editor/context": [
         {
           "command": "codedocsgen.generateDocs"
+        },
+        {
+          "command": "codedocsgen.generateDocsForFile"
         }
       ]
     }
