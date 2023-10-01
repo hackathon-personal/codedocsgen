@@ -29,10 +29,20 @@ function visit(node: ts.Node) {
 
   if (ts.isMethodDeclaration(node)) {
     console.log("Method Declaration");
+
     const functionName = node.name?.getText();
     const functionCode = node.getText();
-
-    functionDict.set(functionName, functionCode);
+    let className: string | undefined;
+    const parentNode = node.parent;
+    if (ts.isClassDeclaration(parentNode)) {
+      className = parentNode?.name?.getText();
+    }
+    console.log("Class name", className);
+    if (className) {
+      functionDict.set(`${className}#${functionName}`, functionCode);
+    } else {
+      functionDict.set(functionName, functionCode);
+    }
   }
 
   ts.forEachChild(node, visit);
