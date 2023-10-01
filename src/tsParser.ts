@@ -1,18 +1,31 @@
 import * as ts from "typescript";
 
-function visit(node: ts.Node): string | undefined {
+
+const functionDict : any = {}
+function visit(node: ts.Node) {
   if (ts.isArrowFunction(node)) {
-    return node.parent.getText();
+    console.log(node.parent.getText());
   }
 
   if (ts.isFunctionDeclaration(node)) {
-    return node.getText();
+    console.log( node.getText());
   }
 
-  return ts.forEachChild(node, visit);
+
+  if (ts.isMethodDeclaration(node)) {
+    const functionName = node.name?.getText()
+    const functionCode = node.getText();
+
+    functionDict[functionName] = functionCode ; 
+   }
+
+  ts.forEachChild(node, visit);
 }
 
 function getFunction(codeString: string) {
+
+
+
   const sourceFile = ts.createSourceFile(
     "detect.ts",
     codeString,
@@ -20,8 +33,10 @@ function getFunction(codeString: string) {
     true,
     ts.ScriptKind.TS
   );
+  visit(sourceFile)
 
-  return visit(sourceFile);
+  console.log(functionDict)
+  return functionDict;
 }
 
 const tsParser = {

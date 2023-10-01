@@ -12,21 +12,37 @@ const generateDocs = vscode.commands.registerCommand(
       const lineCount = document.lineCount;
       const cursorPosition = editor.selection.active;
 
-      let textFromCursorToEnd = "";
+      let textFromCursorToEnd = document.getText();
 
       // Loop through lines from the cursor position to the end of the file
-      for (let line = cursorPosition.line; line < lineCount; line++) {
-        // we should not read to end
-        const lineText = document.lineAt(line).text;
-        textFromCursorToEnd += lineText + "\n";
-      }
+      // for (let line = cursorPosition.line; line < lineCount; line++) {
+      //   // we should not read to end
+      //   const lineText = document.lineAt(line).text;
+      //   textFromCursorToEnd += lineText + "\n";
+      // }
+
+
 
       if (textFromCursorToEnd) {
         const fn = tsParser.getFunction(textFromCursorToEnd);
 
-        if (fn) {
+        let i = 0
+        let resultCode
+        for (let line = cursorPosition.line; line < lineCount; line++) {
+        resultCode =fn.values.filter((value:any)=>{
+              return value.split('\n')[i] == document.lineAt(line).text
+        })
+        i++
+        }
+
+        
+
+        console.log(resultCode)
+
+        if (resultCode) {
           try {
-            let responseDocs = await apiService.getGenerateComment(fn!);
+
+            let responseDocs = await apiService.getGenerateComment(resultCode!);
             responseDocs = `${responseDocs}${"\n"}`;
 
             if (responseDocs) {

@@ -11,8 +11,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:codedocsgen.generateDocs",
-    "onCommand:codedocsgen.welcome"
   ],
   "main": "./out/extension.js",
   "contributes": {
