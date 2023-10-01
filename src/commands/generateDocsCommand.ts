@@ -32,7 +32,7 @@ const generateDocs = vscode.commands.registerCommand(
             if (responseDocs) {
               editor.edit((editBuilder) => {
                 let positionAboveCursor = cursorPosition.with(
-                  cursorPosition.line - 1,
+                  cursorPosition.line - 1 < 0 ? 0 : cursorPosition.line - 1,
                   0
                 );
 
@@ -48,6 +48,7 @@ const generateDocs = vscode.commands.registerCommand(
               });
             }
           } catch (error) {
+            console.log("Error", error);
             vscode.window.showErrorMessage(
               "Something went wrong try again",
               "Dismiss"
