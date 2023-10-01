@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import apiService from "../service/apiService";
 import tsParser from "../tsParser";
+import { FunctionDetails } from "../interface/IFunctionDetails";
 
 const generateDocs = vscode.commands.registerCommand(
   "codedocsgen.generateDocs",
@@ -9,18 +10,18 @@ const generateDocs = vscode.commands.registerCommand(
 
     if (editor) {
       const document = editor.document;
-      const lineCount = document.lineCount;
       const cursorPosition = editor.selection.active;
 
       let textFromCursorToEnd = document.getText();
 
       if (textFromCursorToEnd) {
         const parsedFunctions = tsParser.getFunction(textFromCursorToEnd);
-        const parsedFunctionsArray = Array.from(parsedFunctions.values());
-        let functionCodeToGenerateComment: string[] = [];
+        console.log("parsedFunctions", parsedFunctions);
 
-        for (const functionCode of parsedFunctionsArray) {
-          const noOfLinesInFunction = functionCode.split("\n");
+        let functionCodeToGenerateComment: FunctionDetails[] = [];
+
+        for (const functions of parsedFunctions) {
+          const noOfLinesInFunction = functions.functionCode.split("\n");
 
           let documentCode = "\n";
           for (
@@ -31,24 +32,31 @@ const generateDocs = vscode.commands.registerCommand(
             const lineText = document.lineAt(line).text;
             documentCode += lineText + "\n";
           }
-          console.log("Document text", documentCode);
-          console.log("Function code", functionCode);
           if (
-            documentCode.includes(functionCode) ||
-            functionCode.includes(documentCode)
+            documentCode.includes(functions.functionCode) ||
+            functions.functionCode.includes(documentCode)
           ) {
-            console.log("Function found");
-            functionCodeToGenerateComment.push(functionCode);
+            const selectedFunction = {
+              functionCode: functions.functionCode,
+              functionName: functions.functionName,
+            };
+            functionCodeToGenerateComment.push(selectedFunction);
           }
         }
 
-        console.log(functionCodeToGenerateComment);
+        console.log(
+          "functionCodeToGenerateComment",
+          functionCodeToGenerateComment
+        );
 
         if (functionCodeToGenerateComment.length > 0) {
           try {
             let responseDocs = await apiService.getGenerateComment(
-              functionCodeToGenerateComment[0]
+              functionCodeToGenerateComment
             );
+            console.log(responseDocs);
+
+            responseDocs = responseDocs[0].generatedComment;
             responseDocs = `${responseDocs}${"\n"}`;
 
             if (responseDocs) {
@@ -65,8 +73,7 @@ const generateDocs = vscode.commands.registerCommand(
                 }
 
                 let startPosition = cursorPosition.with(cursorPosition.line, 0);
-
-                editBuilder.insert(startPosition, responseDocs!);
+                editBuilder.insert(startPosition, responseDocs);
               });
             }
           } catch (error) {

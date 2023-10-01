@@ -1,13 +1,15 @@
 import * as ts from "typescript";
+import { FunctionDetails } from "./interface/IFunctionDetails";
 
-const functionDict: Map<string, string> = new Map();
+const functions: FunctionDetails[] = [];
+
 function visit(node: ts.Node) {
   if (ts.isArrowFunction(node)) {
     if (ts.isVariableDeclaration(node.parent)) {
       console.log("Arrow function");
       const functionName = node.parent.name.getText();
       const functionCode = node.getFullText();
-      functionDict.set(functionName!, functionCode);
+      functions.push({ functionName, functionCode });
     }
   }
 
@@ -15,7 +17,7 @@ function visit(node: ts.Node) {
     console.log("Function Declaration");
     const functionName = node.name?.getText();
     const functionCode = node.getText();
-    functionDict.set(functionName!, functionCode);
+    functions.push({ functionName, functionCode });
   }
 
   if (ts.isFunctionExpression(node)) {
@@ -23,7 +25,7 @@ function visit(node: ts.Node) {
       console.log("Function expression");
       const functionName = node.parent.name.getText();
       const functionCode = node.getFullText();
-      functionDict.set(functionName!, functionCode);
+      functions.push({ functionName, functionCode });
     }
   }
 
@@ -39,9 +41,12 @@ function visit(node: ts.Node) {
     }
     console.log("Class name", className);
     if (className) {
-      functionDict.set(`${className}#${functionName}`, functionCode);
+      functions.push({
+        functionName: `${className}#${functionName}`,
+        functionCode,
+      });
     } else {
-      functionDict.set(functionName, functionCode);
+      functions.push({ functionName, functionCode });
     }
   }
 
@@ -58,8 +63,8 @@ function getFunction(codeString: string) {
   );
   visit(sourceFile);
 
-  console.log(functionDict);
-  return functionDict;
+  console.log(functions);
+  return functions;
 }
 
 const tsParser = {

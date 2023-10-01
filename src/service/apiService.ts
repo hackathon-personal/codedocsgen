@@ -1,11 +1,12 @@
 import axios from "axios";
 import utils from "../utils";
-import { HEADERS, METHOD } from "../constants/apiConstants";
+import { HEADERS, Language, METHOD } from "../constants/apiConstants";
+import { FunctionDetails } from "../interface/IFunctionDetails";
 
-async function getGenerateComment(code: string) {
+async function getGenerateComment(code: FunctionDetails[]) {
   const data = {
-    language: "TypeScript",
-    functionCodes: [code],
+    language: Language.TS,
+    functionCodes: code,
   };
 
   const config = {
@@ -17,7 +18,7 @@ async function getGenerateComment(code: string) {
 
   try {
     const response = await axios.request(config);
-    return response.data.response.completion;
+    return response.data.response;
   } catch (error: any) {
     throw new Error(error.message);
   }
