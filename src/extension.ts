@@ -1,6 +1,5 @@
 // The module 'vscode' contains the VS Code extensibility API
 import * as vscode from "vscode";
-import command from "./commands/generateDocsCommand";
 import generateDocsCommand from "./commands/generateDocsCommand";
 import welcomeCommand from "./commands/welcomeCommand";
 
