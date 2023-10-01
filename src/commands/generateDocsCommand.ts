@@ -14,35 +14,41 @@ const generateDocs = vscode.commands.registerCommand(
 
       let textFromCursorToEnd = document.getText();
 
-      // Loop through lines from the cursor position to the end of the file
-      // for (let line = cursorPosition.line; line < lineCount; line++) {
-      //   // we should not read to end
-      //   const lineText = document.lineAt(line).text;
-      //   textFromCursorToEnd += lineText + "\n";
-      // }
-
-
-
       if (textFromCursorToEnd) {
-        const fn = tsParser.getFunction(textFromCursorToEnd);
+        const parsedFunctions = tsParser.getFunction(textFromCursorToEnd);
+        const parsedFunctionsArray = Array.from(parsedFunctions.values());
+        let functionCodeToGenerateComment: string[] = [];
 
-        let i = 0
-        let resultCode
-        for (let line = cursorPosition.line; line < lineCount; line++) {
-        resultCode =fn.values.filter((value:any)=>{
-              return value.split('\n')[i] == document.lineAt(line).text
-        })
-        i++
+        for (const functionCode of parsedFunctionsArray) {
+          const noOfLinesInFunction = functionCode.split("\n");
+
+          let documentCode = "\n";
+          for (
+            let line = cursorPosition.line;
+            line < cursorPosition.line + noOfLinesInFunction.length;
+            line++
+          ) {
+            const lineText = document.lineAt(line).text;
+            documentCode += lineText + "\n";
+          }
+          console.log("Document text", documentCode);
+          console.log("Function code", functionCode);
+          if (
+            documentCode.includes(functionCode) ||
+            functionCode.includes(documentCode)
+          ) {
+            console.log("Function found");
+            functionCodeToGenerateComment.push(functionCode);
+          }
         }
 
-        
+        console.log(functionCodeToGenerateComment);
 
-        console.log(resultCode)
-
-        if (resultCode) {
+        if (functionCodeToGenerateComment.length > 0) {
           try {
-
-            let responseDocs = await apiService.getGenerateComment(resultCode!);
+            let responseDocs = await apiService.getGenerateComment(
+              functionCodeToGenerateComment[0]
+            );
             responseDocs = `${responseDocs}${"\n"}`;
 
             if (responseDocs) {

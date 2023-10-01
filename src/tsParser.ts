@@ -1,31 +1,44 @@
 import * as ts from "typescript";
 
-
-const functionDict : any = {}
+const functionDict: Map<string, string> = new Map();
 function visit(node: ts.Node) {
   if (ts.isArrowFunction(node)) {
-    console.log(node.parent.getText());
+    if (ts.isVariableDeclaration(node.parent)) {
+      console.log("Arrow function");
+      const functionName = node.parent.name.getText();
+      const functionCode = node.getFullText();
+      functionDict.set(functionName!, functionCode);
+    }
   }
 
   if (ts.isFunctionDeclaration(node)) {
-    console.log( node.getText());
+    console.log("Function Declaration");
+    const functionName = node.name?.getText();
+    const functionCode = node.getText();
+    functionDict.set(functionName!, functionCode);
   }
 
+  if (ts.isFunctionExpression(node)) {
+    if (ts.isVariableDeclaration(node.parent)) {
+      console.log("Function expression");
+      const functionName = node.parent.name.getText();
+      const functionCode = node.getFullText();
+      functionDict.set(functionName!, functionCode);
+    }
+  }
 
   if (ts.isMethodDeclaration(node)) {
-    const functionName = node.name?.getText()
+    console.log("Method Declaration");
+    const functionName = node.name?.getText();
     const functionCode = node.getText();
 
-    functionDict[functionName] = functionCode ; 
-   }
+    functionDict.set(functionName, functionCode);
+  }
 
   ts.forEachChild(node, visit);
 }
 
 function getFunction(codeString: string) {
-
-
-
   const sourceFile = ts.createSourceFile(
     "detect.ts",
     codeString,
@@ -33,9 +46,9 @@ function getFunction(codeString: string) {
     true,
     ts.ScriptKind.TS
   );
-  visit(sourceFile)
+  visit(sourceFile);
 
-  console.log(functionDict)
+  console.log(functionDict);
   return functionDict;
 }
 
