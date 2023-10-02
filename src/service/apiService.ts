@@ -1,5 +1,5 @@
 import axios from "axios";
-import utils from "../utils";
+import utils from "../libs/utils";
 import { HEADERS, Language, METHOD } from "../constants/apiConstants";
 import { FunctionDetails } from "../interface/IFunctionDetails";
 

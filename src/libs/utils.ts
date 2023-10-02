@@ -1,4 +1,4 @@
-import { baseUrl } from "./constants/apiConstants";
+import { baseUrl } from "../constants/apiConstants";
 
 function getUrl(param: string) {
   return `${baseUrl}${param}`;

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import apiService from "../service/apiService";
-import tsParser from "../tsParser";
+import tsParser from "../libs/tsParser";
 import {
   ACTIONS,
   COMMANDS,

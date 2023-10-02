@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import tsParser from "../tsParser";
+import tsParser from "../libs/tsParser";
 import apiService from "../service/apiService";
 import { FunctionDocsResponse } from "../interface/IFunctionDocsResponse";
 import {
