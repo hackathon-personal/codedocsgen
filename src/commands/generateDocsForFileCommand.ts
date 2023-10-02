@@ -3,32 +3,54 @@ import tsParser from "../tsParser";
 import apiService from "../service/apiService";
 import { FunctionDocsResponse } from "../interface/IFunctionDocsResponse";
 
+async function insertComments(
+  generatedComments: any,
+  editor: any,
+  cursorPosition: any
+) {
+  let lineCount = 0;
 
-async function insertComments(generatedComments:any,editor:any,cursorPosition:any) {
-  let lineCount = 0
   for (let line of Object.keys(generatedComments)) {
-    const lineNumber = parseInt(line);
-    const comment = generatedComments[lineNumber]
+    const [startPos, endPos] = line.split("#");
+    const selectedFuncStartPos = parseInt(startPos);
+    const selectedFuncEndPos = parseInt(endPos);
+    const document = editor.document;
 
-    console.log("line", line);
-    console.log("comment length",lineCount)
+    let jSDocComment = generatedComments[line];
 
-
-    await editor.edit((editBuilder : any) => {
-      let JSDoc = `${generatedComments[lineNumber]}\n`;
-
+    await editor.edit((editBuilder: any) => {
       let startPosition = cursorPosition.with(
-        (lineNumber == 1 ? 0 : lineNumber - 1) + lineCount,
+        selectedFuncStartPos +
+          (lineCount === 0 && selectedFuncStartPos > 0 ? -1 : lineCount),
         0
       );
+      console.log(
+        "Function Start Position",
+        selectedFuncStartPos,
+        selectedFuncEndPos
+      );
+      console.log(
+        "Before Line count",
+        lineCount,
+        jSDocComment.split("\n").length + 1
+      );
+
+      const currentLineText = document.lineAt(startPosition).text;
+      if (currentLineText) {
+        jSDocComment = `${"\n"}${jSDocComment}`;
+      }
+      jSDocComment = `${jSDocComment}${"\n"}`;
+      console.log(
+        "After Line count",
+        lineCount,
+        jSDocComment.split("\n").length + 1
+      );
       console.log(startPosition);
-      editBuilder.insert(startPosition, JSDoc);
+      editBuilder.insert(startPosition, jSDocComment);
     });
-   lineCount = lineCount+ comment.split('\n').length+1
+    lineCount = lineCount + jSDocComment.split("\n").length - 1;
   }
 }
-
-
 
 const generateDocsForFile = vscode.commands.registerCommand(
   "codedocsgen.generateDocsForFile",
@@ -53,8 +75,7 @@ const generateDocsForFile = vscode.commands.registerCommand(
               generatedComments &&
               Object.keys(generatedComments).length > 0
             ) {
-              insertComments(generatedComments,editor,cursorPosition)
-              
+              await insertComments(generatedComments, editor, cursorPosition);
             }
           } catch (error) {
             console.log("Error", error);
