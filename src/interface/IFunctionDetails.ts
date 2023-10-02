@@ -1,4 +1,4 @@
 export interface FunctionDetails {
-  functionName: number | undefined;
+  functionName: string | undefined;
   functionCode: string;
 }

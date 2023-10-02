@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import apiService from "../service/apiService";
 import tsParser from "../tsParser";
-import { FunctionDetails } from "../interface/IFunctionDetails";
 
 const generateDocs = vscode.commands.registerCommand(
   "codedocsgen.generateDocs",
@@ -18,62 +17,46 @@ const generateDocs = vscode.commands.registerCommand(
         const parsedFunctions = tsParser.getFunction(textFromCursorToEnd);
         console.log("parsedFunctions", parsedFunctions);
 
-        let functionCodeToGenerateComment: FunctionDetails[] = [];
-
-        for (const functions of parsedFunctions) {
-          const noOfLinesInFunction = functions.functionCode.split("\n");
-
-          let documentCode = "\n";
-          for (
-            let line = cursorPosition.line;
-            line < cursorPosition.line + noOfLinesInFunction.length;
-            line++
-          ) {
-            const lineText = document.lineAt(line).text;
-            documentCode += lineText + "\n";
-          }
-          if (
-            documentCode.includes(functions.functionCode) ||
-            functions.functionCode.includes(documentCode)
-          ) {
-            const selectedFunction = {
-              functionCode: functions.functionCode,
-              functionName: functions.functionName,
-            };
-            functionCodeToGenerateComment.push(selectedFunction);
-          }
-        }
-
-        console.log(
-          "functionCodeToGenerateComment",
-          functionCodeToGenerateComment
-        );
-
-        if (functionCodeToGenerateComment.length > 0) {
+        if (parsedFunctions.length > 0) {
           try {
+            let selectedFunc = [];
+            let selectedFuncStartPos: number | null = null;
+            for (const funcObj of parsedFunctions) {
+              const [startPos, endPos]: any = funcObj.functionName?.split("#");
+              selectedFuncStartPos = parseInt(startPos);
+              console.log(startPos, endPos, cursorPosition.line);
+              if (
+                parseInt(startPos) <= cursorPosition.line + 1 &&
+                cursorPosition.line + 1 <= parseInt(endPos)
+              ) {
+                selectedFunc.push(funcObj);
+                break;
+              }
+            }
+            console.log(selectedFunc);
             let responseDocs = await apiService.getGenerateComment(
-              functionCodeToGenerateComment
+              selectedFunc
             );
             console.log(responseDocs);
 
-            responseDocs = Object.values(responseDocs)[0];
+            responseDocs = responseDocs[selectedFunc[0].functionName!];
             responseDocs = `${responseDocs}${"\n"}`;
 
             if (responseDocs) {
               editor.edit((editBuilder) => {
-                let positionAboveCursor = cursorPosition.with(
-                  cursorPosition.line - 1 < 0 ? 0 : cursorPosition.line - 1,
-                  0
-                );
+                if (selectedFuncStartPos != null) {
+                  let startPosition = cursorPosition.with(
+                    selectedFuncStartPos - 1,
+                    0
+                  );
+                  const currentLineText = document.lineAt(startPosition).text;
+                  if (currentLineText) {
+                    responseDocs = `${"\n"}${responseDocs}`;
+                  }
 
-                const lineText = document.lineAt(positionAboveCursor).text;
-
-                if (lineText) {
-                  responseDocs = `${"\n"}${responseDocs}`;
+                  console.log(startPosition);
+                  editBuilder.insert(startPosition, responseDocs);
                 }
-
-                let startPosition = cursorPosition.with(cursorPosition.line, 0);
-                editBuilder.insert(startPosition, responseDocs);
               });
             }
           } catch (error) {

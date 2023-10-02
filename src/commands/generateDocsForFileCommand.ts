@@ -3,6 +3,33 @@ import tsParser from "../tsParser";
 import apiService from "../service/apiService";
 import { FunctionDocsResponse } from "../interface/IFunctionDocsResponse";
 
+
+async function insertComments(generatedComments:any,editor:any,cursorPosition:any) {
+  let lineCount = 0
+  for (let line of Object.keys(generatedComments)) {
+    const lineNumber = parseInt(line);
+    const comment = generatedComments[lineNumber]
+
+    console.log("line", line);
+    console.log("comment length",lineCount)
+
+
+    await editor.edit((editBuilder : any) => {
+      let JSDoc = `${generatedComments[lineNumber]}\n`;
+
+      let startPosition = cursorPosition.with(
+        (lineNumber == 1 ? 0 : lineNumber - 1) + lineCount,
+        0
+      );
+      console.log(startPosition);
+      editBuilder.insert(startPosition, JSDoc);
+    });
+   lineCount = lineCount+ comment.split('\n').length+1
+  }
+}
+
+
+
 const generateDocsForFile = vscode.commands.registerCommand(
   "codedocsgen.generateDocsForFile",
   async () => {
@@ -26,19 +53,8 @@ const generateDocsForFile = vscode.commands.registerCommand(
               generatedComments &&
               Object.keys(generatedComments).length > 0
             ) {
-              for (let line of Object.keys(generatedComments)) {
-                const lineNumber = parseInt(line);
-                console.log("line", line);
-                editor.edit((editBuilder) => {
-                  let JSDoc = `${generatedComments[lineNumber]}\n`;
-
-                  let startPosition = cursorPosition.with(
-                    lineNumber > 0 ? lineNumber - 1 : lineNumber,
-                    0
-                  );
-                  editBuilder.insert(startPosition, JSDoc);
-                });
-              }
+              insertComments(generatedComments,editor,cursorPosition)
+              
             }
           } catch (error) {
             console.log("Error", error);
