@@ -15,51 +15,29 @@ const generateDocsForFile = vscode.commands.registerCommand(
 
       if (documentText) {
         const parsedFunctions = tsParser.getFunction(documentText);
-
+        console.log("parsedFunctions", parsedFunctions);
         if (parsedFunctions.length > 0) {
           try {
-            let responseDocs: FunctionDocsResponse[] =
+            const generatedComments: FunctionDocsResponse =
               await apiService.getGenerateComment(parsedFunctions);
-            console.log(responseDocs);
+            console.log(generatedComments);
 
-            for (const functions of parsedFunctions) {
-              const noOfLinesInFunction = functions.functionCode.split("\n");
+            if (
+              generatedComments &&
+              Object.keys(generatedComments).length > 0
+            ) {
+              for (let line of Object.keys(generatedComments)) {
+                const lineNumber = parseInt(line);
+                console.log("line", line);
+                editor.edit((editBuilder) => {
+                  let JSDoc = `${generatedComments[lineNumber]}\n`;
 
-              let documentCode = "\n";
-              for (
-                let line = 0;
-                line < document.lineCount + noOfLinesInFunction.length;
-                line++
-              ) {
-                const lineText = document.lineAt(line).text;
-                documentCode += lineText + "\n";
-              }
-              if (
-                documentCode.includes(functions.functionCode) ||
-                functions.functionCode.includes(documentCode)
-              ) {
-                responseDocs = responseDocs = `${responseDocs}${"\n"}`;
-
-                if (responseDocs) {
-                  editor.edit((editBuilder) => {
-                    let positionAboveCursor = cursorPosition.with(
-                      cursorPosition.line - 1 < 0 ? 0 : cursorPosition.line - 1,
-                      0
-                    );
-
-                    const lineText = document.lineAt(positionAboveCursor).text;
-
-                    if (lineText) {
-                      responseDocs = `${"\n"}${responseDocs}`;
-                    }
-
-                    let startPosition = cursorPosition.with(
-                      cursorPosition.line,
-                      0
-                    );
-                    editBuilder.insert(startPosition, responseDocs);
-                  });
-                }
+                  let startPosition = cursorPosition.with(
+                    lineNumber > 0 ? lineNumber - 1 : lineNumber,
+                    0
+                  );
+                  editBuilder.insert(startPosition, JSDoc);
+                });
               }
             }
           } catch (error) {

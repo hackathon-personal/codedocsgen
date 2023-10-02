@@ -56,7 +56,7 @@ const generateDocs = vscode.commands.registerCommand(
             );
             console.log(responseDocs);
 
-            responseDocs = responseDocs[0].generatedComment;
+            responseDocs = Object.values(responseDocs)[0];
             responseDocs = `${responseDocs}${"\n"}`;
 
             if (responseDocs) {

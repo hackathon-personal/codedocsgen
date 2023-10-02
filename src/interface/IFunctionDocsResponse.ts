@@ -1,4 +1,3 @@
 export interface FunctionDocsResponse {
-  functionName: string | undefined;
-  generatedComment: string;
+  [key: number]: string;
 }
