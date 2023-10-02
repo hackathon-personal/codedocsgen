@@ -1,9 +1,14 @@
 import * as vscode from "vscode";
 import apiService from "../service/apiService";
 import tsParser from "../tsParser";
+import {
+  ACTIONS,
+  COMMANDS,
+  ERROR_MESSAGES,
+} from "../constants/applicationConstants";
 
 const generateDocs = vscode.commands.registerCommand(
-  "codedocsgen.generateDocs",
+  COMMANDS.GENERATE_DOCS_FOR_SELECTION,
   async () => {
     const editor = vscode.window.activeTextEditor;
 
@@ -34,6 +39,13 @@ const generateDocs = vscode.commands.registerCommand(
               }
             }
             console.log(selectedFunc);
+            if (selectedFunc.length === 0) {
+              vscode.window.showInformationMessage(
+                ERROR_MESSAGES.functionNotFound,
+                ACTIONS.dismiss
+              );
+              return;
+            }
             let responseDocs = await apiService.getGenerateComment(
               selectedFunc
             );
@@ -62,12 +74,15 @@ const generateDocs = vscode.commands.registerCommand(
           } catch (error) {
             console.log("Error", error);
             vscode.window.showErrorMessage(
-              "Something went wrong try again",
-              "Dismiss"
+              ERROR_MESSAGES.somethingWentWrong,
+              ACTIONS.dismiss
             );
           }
         } else {
-          vscode.window.showInformationMessage("Function not found", "Dismiss");
+          vscode.window.showInformationMessage(
+            ERROR_MESSAGES.functionNotFound,
+            ACTIONS.dismiss
+          );
         }
       }
     }

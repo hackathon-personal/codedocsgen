@@ -2,6 +2,11 @@ import * as vscode from "vscode";
 import tsParser from "../tsParser";
 import apiService from "../service/apiService";
 import { FunctionDocsResponse } from "../interface/IFunctionDocsResponse";
+import {
+  ACTIONS,
+  COMMANDS,
+  ERROR_MESSAGES,
+} from "../constants/applicationConstants";
 
 async function insertComments(
   generatedComments: any,
@@ -24,27 +29,13 @@ async function insertComments(
           (lineCount === 0 && selectedFuncStartPos > 0 ? -1 : lineCount),
         0
       );
-      console.log(
-        "Function Start Position",
-        selectedFuncStartPos,
-        selectedFuncEndPos
-      );
-      console.log(
-        "Before Line count",
-        lineCount,
-        jSDocComment.split("\n").length + 1
-      );
 
       const currentLineText = document.lineAt(startPosition).text;
       if (currentLineText) {
         jSDocComment = `${"\n"}${jSDocComment}`;
       }
       jSDocComment = `${jSDocComment}${"\n"}`;
-      console.log(
-        "After Line count",
-        lineCount,
-        jSDocComment.split("\n").length + 1
-      );
+
       console.log(startPosition);
       editBuilder.insert(startPosition, jSDocComment);
     });
@@ -53,7 +44,7 @@ async function insertComments(
 }
 
 const generateDocsForFile = vscode.commands.registerCommand(
-  "codedocsgen.generateDocsForFile",
+  COMMANDS.GENERATE_DOCS_FOR_FILE,
   async () => {
     const editor = vscode.window.activeTextEditor;
 
@@ -80,12 +71,15 @@ const generateDocsForFile = vscode.commands.registerCommand(
           } catch (error) {
             console.log("Error", error);
             vscode.window.showErrorMessage(
-              "Something went wrong try again",
-              "Dismiss"
+              ERROR_MESSAGES.somethingWentWrong,
+              ACTIONS.dismiss
             );
           }
         } else {
-          vscode.window.showInformationMessage("Function not found", "Dismiss");
+          vscode.window.showInformationMessage(
+            ERROR_MESSAGES.functionNotFound,
+            ACTIONS.dismiss
+          );
         }
       }
     }
