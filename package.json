@@ -30,6 +30,11 @@
         "command": "codedocsgen.generateDocsForFile",
         "title": "Generate JSDoc for all elements",
         "category": "CodeDocsGen"
+      },
+      {
+        "command": "codedocsgen.generateDocsForProject",
+        "title": "Generate JSDoc for all elements in project",
+        "category": "CodeDocsGen"
       }
     ],
     "menus": {
@@ -39,6 +44,9 @@
         },
         {
           "command": "codedocsgen.generateDocsForFile"
+        },
+        {
+          "command": "codedocsgen.generateDocsForProject"
         }
       ]
     }
