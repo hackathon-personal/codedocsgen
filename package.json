@@ -2,8 +2,9 @@
   "name": "codedocsgen",
   "displayName": "CodeDocsGen",
   "description": "CodeDocsGen is a powerful code documentation extension designed to simplify the process of generating method documentation for your programming projects. This extension seamlessly integrates with your preferred code editor or integrated development environment (IDE) to automate the generation of method documentation, helping you maintain clean, well-documented code effortlessly.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "presidio-developers",
+  "icon": "3.jpeg",
   "engines": {
     "vscode": "^1.82.0"
   },
